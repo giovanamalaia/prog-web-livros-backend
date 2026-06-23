@@ -1,0 +1,467 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 1.0\n"
+"POT-Creation-Date: 2026-04-20 00:00+0000\n"
+"PO-Revision-Date: 2026-04-20 00:00+0000\n"
+"Language: en\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Troca de Livros"
+msgstr "Book Exchange"
+
+msgid "Livrô - Autenticação"
+msgstr "Livrô - Authentication"
+
+msgid "Ícone do site"
+msgstr "Site icon"
+
+msgid "Navegação lateral"
+msgstr "Side navigation"
+
+msgid "Início"
+msgstr "Home"
+
+msgid "Favoritos"
+msgstr "Favorites"
+
+msgid "Perfil"
+msgstr "Profile"
+
+msgid "Adicionar livro"
+msgstr "Add book"
+
+msgid "Configurações"
+msgstr "Settings"
+
+msgid "Pesquisar livro, nome, autor..."
+msgstr "Search book, name, author..."
+
+msgid "Avatar de %(username)s"
+msgstr "Avatar of %(username)s"
+
+msgid "Notificações"
+msgstr "Notifications"
+
+msgid ""
+"<strong>%(user_name)s</strong> tem interesse no seu livro <strong>"
+"%(book_title)s</strong>."
+msgstr ""
+"<strong>%(user_name)s</strong> is interested in your book <strong>"
+"%(book_title)s</strong>."
+
+msgid "%(time)s atrás"
+msgstr "%(time)s ago"
+
+msgid "Aceitar"
+msgstr "Accept"
+
+msgid "Recusar"
+msgstr "Decline"
+
+msgid "Nenhuma solicitação de troca no momento."
+msgstr "No exchange requests at the moment."
+
+msgid "Sem capa"
+msgstr "No cover"
+
+msgid "Nenhum livro encontrado nesta seção."
+msgstr "No books found in this section."
+
+msgid "Últimos"
+msgstr "Latest"
+
+msgid "Meus interesses"
+msgstr "My interests"
+
+msgid "Perto de você"
+msgstr "Near you"
+
+msgid "Meus livros"
+msgstr "My books"
+
+msgid "Pendente"
+msgstr "Pending"
+
+msgid "Aceito"
+msgstr "Accepted"
+
+msgid "Rejeitado"
+msgstr "Rejected"
+
+msgid "Voltar"
+msgstr "Back"
+
+msgid "Dono"
+msgstr "Owner"
+
+msgid "Autor"
+msgstr "Author"
+
+msgid "Gênero"
+msgstr "Genre"
+
+msgctxt "state"
+msgid "Estado"
+msgstr "State"
+
+msgctxt "book_condition"
+msgid "Estado"
+msgstr "Condition"
+
+msgid "Disponível"
+msgstr "Available"
+
+msgid "Sim"
+msgstr "Yes"
+
+msgid "Não"
+msgstr "No"
+
+msgid "Status"
+msgstr "Status"
+
+msgid "Editar livro"
+msgstr "Edit book"
+
+msgid "Excluir livro"
+msgstr "Delete book"
+
+msgid "Excluir interesse"
+msgstr "Remove interest"
+
+msgid "Tenho interesse"
+msgstr "I'm interested"
+
+msgid "Nome de usuário"
+msgstr "Username"
+
+msgid "Nome"
+msgstr "First name"
+
+msgid "Sobrenome"
+msgstr "Last name"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Salvar alterações"
+msgstr "Save changes"
+
+msgid "Redefinir senha"
+msgstr "Reset password"
+
+msgid "Trocar foto"
+msgstr "Change photo"
+
+msgid "Escolha uma nova imagem e clique em"
+msgstr "Choose a new image and click"
+
+msgid "para atualizar seu perfil."
+msgstr "to update your profile."
+
+msgid "Sair"
+msgstr "Log out"
+
+msgid "EDITAR LIVRO"
+msgstr "EDIT BOOK"
+
+msgid "ADICIONAR LIVRO"
+msgstr "ADD BOOK"
+
+msgid "Título"
+msgstr "Title"
+
+msgid "Capa"
+msgstr "Cover"
+
+msgid "Selecione uma imagem para a capa. O nome do arquivo escolhido aparece no campo abaixo."
+msgstr "Select a cover image. The chosen file name appears in the field below."
+
+msgid "Confirmar"
+msgstr "Confirm"
+
+msgid "Capa atual do livro"
+msgstr "Current book cover"
+
+msgid "Login"
+msgstr "Login"
+
+msgid "Entrar"
+msgstr "Sign in"
+
+msgid "Bem-vindo de volta! Digite seus dados para acessar."
+msgstr "Welcome back! Enter your details to sign in."
+
+msgid "Não tem conta?"
+msgstr "Don't have an account?"
+
+msgid "Cadastre-se"
+msgstr "Sign up"
+
+msgid "Cadastro"
+msgstr "Sign up"
+
+msgid "Vamos lá, crie uma conta"
+msgstr "Let's go, create an account"
+
+msgid "Selecione o estado e clique em \"Carregar cidades\" para habilitar a lista."
+msgstr "Select the state and click \"Load cities\" to enable the list."
+
+msgid "Carregar cidades"
+msgstr "Load cities"
+
+msgid "Cadastrar-se"
+msgstr "Create account"
+
+msgid "Já tem uma conta?"
+msgstr "Already have an account?"
+
+msgid "Foto de %(username)s"
+msgstr "Photo of %(username)s"
+
+msgid "Conta criada e login realizado com sucesso!"
+msgstr "Account created and you are now logged in!"
+
+msgid "Login realizado com sucesso!"
+msgstr "Login successful!"
+
+msgid "Você saiu da sua conta."
+msgstr "You have signed out."
+
+msgid "Esse username já está em uso por outra conta."
+msgstr "This username is already in use."
+
+msgid "Esse e-mail já está cadastrado em outra conta."
+msgstr "This email is already registered."
+
+msgid "Configurações salvas com sucesso!"
+msgstr "Settings saved successfully!"
+
+msgid "Livro adicionado com sucesso!"
+msgstr "Book added successfully!"
+
+msgid "Livro excluído com sucesso!"
+msgstr "Book deleted successfully!"
+
+msgid "Livro atualizado com sucesso!"
+msgstr "Book updated successfully!"
+
+msgid "Você não pode demonstrar interesse no seu próprio livro."
+msgstr "You cannot express interest in your own book."
+
+msgid "Interesse registrado!"
+msgstr "Interest registered!"
+
+msgid "Boas notícias! Alguém quer seu livro: %(titulo)s"
+msgstr "Good news! Someone wants your book: %(titulo)s"
+
+msgid ""
+"Olá %(nome_dono)s,\n"
+"\n"
+"O usuário %(nome_interessado)s acabou de demonstrar interesse em trocar o seu "
+"livro '%(titulo)s'.\n"
+"\n"
+"Acesse a plataforma para aceitar ou recusar a solicitação!\n"
+"\n"
+"Abraços,\n"
+"Equipe do Livrô"
+msgstr ""
+"Hello %(nome_dono)s,\n"
+"\n"
+"User %(nome_interessado)s has just expressed interest in exchanging your book "
+"\"%(titulo)s\".\n"
+"\n"
+"Access the platform to accept or decline the request!\n"
+"\n"
+"Best regards,\n"
+"Livrô Team"
+
+msgid "Você já demonstrou interesse nesse livro."
+msgstr "You have already expressed interest in this book."
+
+msgid "Match! Você aceitou trocar: %(titulo)s"
+msgstr "It's a match! You accepted the exchange: %(titulo)s"
+
+msgid ""
+"Olá %(nome_dono)s,\n"
+"\n"
+"Você acabou de aceitar a solicitação de %(nome_interessado)s para o livro "
+"'%(titulo)s'.\n"
+"\n"
+"Para combinar a troca (local, horário ou envio), entre em contato diretamente "
+"pelo e-mail:\n"
+"📧 %(email)s\n"
+"\n"
+"Boas trocas!\n"
+"Equipe do Livrô"
+msgstr ""
+"Hello %(nome_dono)s,\n"
+"\n"
+"You have just accepted %(nome_interessado)s's request for the book "
+"\"%(titulo)s\".\n"
+"\n"
+"To arrange the exchange (place, time, or shipping), contact them directly at:\n"
+"📧 %(email)s\n"
+"\n"
+"Happy exchanges!\n"
+"Livrô Team"
+
+msgid "Deu Match! Seu interesse em %(titulo)s foi aceito!"
+msgstr "It's a match! Your interest in %(titulo)s was accepted!"
+
+msgid ""
+"Olá %(nome_interessado)s,\n"
+"\n"
+"Ótimas notícias! O usuário %(nome_dono)s aceitou o seu interesse pelo livro "
+"'%(titulo)s'.\n"
+"\n"
+"Para combinar os detalhes da troca, mande um e-mail para:\n"
+"📧 %(email)s\n"
+"\n"
+"Boas trocas!\n"
+"Equipe do Livrô"
+msgstr ""
+"Hello %(nome_interessado)s,\n"
+"\n"
+"Great news! %(nome_dono)s accepted your interest in the book \"%(titulo)s\".\n"
+"\n"
+"To arrange the exchange details, send an email to:\n"
+"📧 %(email)s\n"
+"\n"
+"Happy exchanges!\n"
+"Livrô Team"
+
+msgid "Interesse aceito! Os e-mails de contato foram enviados para os dois."
+msgstr "Interest accepted! Contact emails were sent to both."
+
+msgid "Atualização sobre o livro: %(titulo)s"
+msgstr "Update about the book: %(titulo)s"
+
+msgid ""
+"Olá %(nome_interessado)s,\n"
+"\n"
+"Infelizmente, o dono do livro '%(titulo)s' não pôde aceitar a sua solicitação "
+"de troca neste momento. O livro pode já ter sido prometido a outra pessoa.\n"
+"\n"
+"Não desanime! Continue explorando a plataforma para encontrar outras opções "
+"incríveis.\n"
+"\n"
+"Abraços,\n"
+"Equipe do Livrô"
+msgstr ""
+"Hello %(nome_interessado)s,\n"
+"\n"
+"Unfortunately, the owner of the book \"%(titulo)s\" couldn't accept your "
+"exchange request at the moment. The book may already be promised to someone "
+"else.\n"
+"\n"
+"Don't give up! Keep exploring the platform to find other great options.\n"
+"\n"
+"Best regards,\n"
+"Livrô Team"
+
+msgid "O interesse foi recusado e o usuário foi notificado."
+msgstr "The interest was declined and the user was notified."
+
+msgid "Selecione a cidade"
+msgstr "Select the city"
+
+msgid "Selecione o estado"
+msgstr "Select the state"
+
+msgid "Cidade"
+msgstr "City"
+
+msgid "Selecione o estado primeiro"
+msgstr "Select the state first"
+
+msgid "Senha"
+msgstr "Password"
+
+msgid "Confirme a senha"
+msgstr "Confirm password"
+
+msgid "Primeiro nome"
+msgstr "First name"
+
+msgid "Reservado"
+msgstr "Reserved"
+
+msgid "Trocado"
+msgstr "Traded"
+
+msgid "Novo"
+msgstr "New"
+
+msgid "Semi-novo"
+msgstr "Like new"
+
+msgid "Usado"
+msgstr "Used"
+
+msgid "Ficção Geral"
+msgstr "General Fiction"
+
+msgid "Não Ficção Geral"
+msgstr "General Non-Fiction"
+
+msgid "Fantasia"
+msgstr "Fantasy"
+
+msgid "Ficção Científica"
+msgstr "Science Fiction"
+
+msgid "Romance"
+msgstr "Romance"
+
+msgid "Mistério & Suspense"
+msgstr "Mystery & Thriller"
+
+msgid "Terror"
+msgstr "Horror"
+
+msgid "Aventura"
+msgstr "Adventure"
+
+msgid "Jovem Adulto"
+msgstr "Young Adult"
+
+msgid "Infantil & Infanto-juvenil"
+msgstr "Children & Teen"
+
+msgid "HQs, Mangás & Graphic Novels"
+msgstr "Comics, Manga & Graphic Novels"
+
+msgid "Biografia"
+msgstr "Biography"
+
+msgid "Autoajuda"
+msgstr "Self-Help"
+
+msgid "Acadêmicos"
+msgstr "Academic"
+
+msgid "História & Política"
+msgstr "History & Politics"
+
+msgid "Religião & Espiritualidade"
+msgstr "Religion & Spirituality"
+
+msgid "Literatura Clássica"
+msgstr "Classic Literature"
+
+msgid "Literatura Contemporânea"
+msgstr "Contemporary Literature"
+
+msgid "Drama"
+msgstr "Drama"
+
+msgid "Poesia"
+msgstr "Poetry"
+
+msgid "Teatro (Peças)"
+msgstr "Theatre (Plays)"
+
+msgid "Outros"
+msgstr "Other"

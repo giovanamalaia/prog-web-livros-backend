@@ -1,0 +1,19 @@
+# Ambiente Virtual
+venv/
+env/
+
+# Banco de dados local (não suba o db.sqlite3 com dados de teste!)
+db.sqlite3
+
+# Variáveis de ambiente (onde ficam suas senhas de e-mail)
+.env
+
+# Arquivos compilados do Python
+__pycache__/
+*.pyc
+
+# Pastas de mídia (geralmente não se sobe fotos de perfil de teste)
+media/
+
+# Pastas de estáticos (geralmente geradas pelo collectstatic)
+static_root/
