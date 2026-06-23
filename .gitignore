@@ -17,3 +17,5 @@ media/
 
 # Pastas de estáticos (geralmente geradas pelo collectstatic)
 static_root/
+
+.DS_Store
