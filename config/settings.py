@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'rest_framework',      
+    'drf_spectacular',    
     'core',
 ]
 
@@ -172,3 +174,13 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema', 
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Livro API',
+    'DESCRIPTION': 'API do sistema de gestão de livros',
+    'VERSION': '1.0.0',
+}
