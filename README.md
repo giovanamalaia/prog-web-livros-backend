@@ -10,7 +10,7 @@ Backend do projeto **Livro**, uma plataforma de troca de livros entre usuarios. 
 ## Links
 
 - Repositorio do backend: https://github.com/giovanamalaia/prog-web-livros-backend
-- Repositorio do frontend: adicionar link do repositorio frontend
+- Repositorio do frontend: https://github.com/giovanamalaia/prog-web-livros-frontend.git
 - Site do backend/API: adicionar link publicado
 - Site do frontend: adicionar link publicado
 - Swagger: `/swagger/`
