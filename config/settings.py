@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--3gk=lkcrr!w*=_+1zso_9hb=+z_$twm1@vyg9e8)+js0d-n@7'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -162,6 +162,7 @@ else:
 
 
 CORS_ALLOWED_ORIGINS = [
+    "https://livroapp.netlify.app",
     "http://localhost:5500",
     "http://127.0.0.1:5500",
     "http://localhost:3000",
@@ -174,6 +175,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Permite que requisições POST do front não sejam bloqueadas pelo CSRF do Django
 CSRF_TRUSTED_ORIGINS = [
+    "https://livroapp.netlify.app",
     "http://localhost:5500",
     "http://127.0.0.1:5500",
     "http://localhost:3000",

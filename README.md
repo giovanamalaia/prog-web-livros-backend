@@ -17,6 +17,14 @@ Backend do projeto **Livro**, uma plataforma de troca de livros entre usuarios. 
 - Schema OpenAPI: `/api/schema/`
 - Redoc: `/redoc/`
 
+## Screenshots
+
+![Tela de login](docs/screenshots/login.png)
+
+![Perfil do usuário](docs/screenshots/perfil.png)
+
+![Adicionar livro](docs/screenshots/adicionar-livro.png)
+
 ## Escopo do projeto
 
 O sistema permite que usuarios cadastrem livros para troca, naveguem pelo catalogo, demonstrem interesse em livros de outros usuarios e gerenciem solicitacoes recebidas. Tambem ha uma lista separada de **desejos futuros**, para salvar livros que o usuario quer acompanhar sem enviar uma solicitacao de troca ao dono.

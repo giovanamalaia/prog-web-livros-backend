@@ -9,11 +9,13 @@ from .models import Livro, Interesse, ESTADO_UF_CHOICES
 from django.contrib.auth.forms import AuthenticationForm
 
 DATA_PATH = Path(__file__).resolve().parent / "data" / "ibge_cidades.json"
+# carrega o arquivo do ibge com as cidades agrupadas por estado
 with DATA_PATH.open(encoding="utf-8") as data_file:
     CIDADES_POR_UF = json.load(data_file)
 
 # Arquivo onde estão todos os formulários para ser preenchidos pelo usuário, como o de registro, login, cadastro de livros e edição de perfil.
 
+# retorna as opções de cidade de um estado para preencher o campo do formulário
 def choices_cidades(uf):
     cidades = CIDADES_POR_UF.get(uf, {}).get("cidades", [])
     return [('', _('Selecione a cidade'))] + [(cidade, cidade) for cidade in cidades]

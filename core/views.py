@@ -22,11 +22,13 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 from .models import Livro, Interesse, Perfil, DesejoFuturo
 from .forms import RegistroForm, LoginForm, PerfilLocalizacaoForm, LivroForm
 
+# retorna erro 401 se o usuário não estiver autenticado
 def check_auth(request):
     if not request.user.is_authenticated:
         return Response({'status': 'error', 'message': 'Usuário não autenticado.'}, status=status.HTTP_401_UNAUTHORIZED)
     return None
 
+# monta um dict resumido do livro para usar nas listagens
 def livro_resumo(livro, request):
     return {
         'id': livro.id,
@@ -39,11 +41,13 @@ def livro_resumo(livro, request):
         'capa_url': request.build_absolute_uri(livro.capa.url) if livro.capa else None,
     }
 
+# retorna a url absoluta da foto de perfil, se existir
 def perfil_foto_url(perfil, request):
     if perfil and perfil.foto_perfil:
         return request.build_absolute_uri(perfil.foto_perfil.url)
     return None
 
+# gera o link com uid+token e envia o e-mail de recuperação de senha
 def enviar_email_recuperacao_senha(user, frontend_url):
     uid = urlsafe_base64_encode(force_bytes(user.pk))
     token = default_token_generator.make_token(user)
@@ -80,8 +84,10 @@ def home(request):
     auth_error = check_auth(request)
     if auth_error: return auth_error
 
+    # exclui os livros do próprio usuário do feed
     livros_disponiveis = Livro.objects.filter(disponivel=True).exclude(dono=request.user)
 
+    # filtra por título ou autor se houver termo de busca
     q = request.GET.get('q', '').strip()
     if q:
         termos = [termo for termo in q.split() if termo]
@@ -94,6 +100,7 @@ def home(request):
     else:
         latest_books = livros_disponiveis.order_by('-data_adicao')[:20]
 
+    # prioriza livros da mesma cidade, depois do mesmo estado
     livros_perto = Livro.objects.none()
     perfil_usuario = getattr(request.user, 'perfil', None)
     
@@ -115,6 +122,7 @@ def home(request):
         elif estado_usuario:
             livros_perto = livros_disponiveis.filter(dono__perfil__estado=estado_usuario).order_by('-data_adicao')[:20]
 
+    # agrupa os livros disponíveis por gênero para exibição no feed
     livros_por_genero = []
     for slug_genero, nome_bonito in Livro.GENERO_CHOICES:
         livros_do_genero = livros_disponiveis.filter(genero=slug_genero).order_by('-data_adicao')
@@ -141,6 +149,7 @@ def registro(request):
 
     if form.is_valid():
         user = form.save()
+        # cria o perfil associado e loga automaticamente após o cadastro
         Perfil.objects.create(
             user=user,
             estado=form.cleaned_data['estado'],
@@ -174,6 +183,7 @@ def solicitar_recuperacao_senha(request):
     for user in usuarios:
         enviar_email_recuperacao_senha(user, frontend_url)
 
+    # resposta genérica para não revelar se o e-mail está cadastrado
     return Response({
         'status': 'success',
         'message': 'Se o e-mail estiver cadastrado, enviaremos um link de recuperação.'
@@ -200,6 +210,7 @@ def confirmar_recuperacao_senha(request):
     senha = request.data.get('new_password1')
     confirmar_senha = request.data.get('new_password2')
 
+    # decodifica o uid e valida o token antes de permitir a troca de senha
     try:
         user_id = force_str(urlsafe_base64_decode(uid))
         user = User.objects.get(pk=user_id)
@@ -292,6 +303,7 @@ def configuracoes(request):
         perfil.estado = localizacao_form.cleaned_data.get('estado') or None
         perfil.cidade = localizacao_form.cleaned_data.get('cidade') or None
 
+        # só atualiza a foto de perfil se uma nova imagem foi enviada
         if 'foto_perfil' in request.FILES:
             perfil.foto_perfil = request.FILES.get('foto_perfil')
         perfil.save()
@@ -365,6 +377,7 @@ def detalhe_livro(request, livro_id):
     except Livro.DoesNotExist:
         return Response({'status': 'error', 'message': 'Livro não encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
+    # só verifica interesse e desejo futuro se o usuário não for o dono
     meu_interesse = None
     meu_desejo_futuro = False
     if request.user != livro.dono:
@@ -422,6 +435,7 @@ def editar_livro(request, livro_id):
     
     if form.is_valid():
         livro = form.save()
+        # recusa os interesses pendentes quando o livro é marcado como trocado
         if status_anterior != 'trocado' and livro.status == 'trocado':
             Interesse.objects.filter(livro=livro, status='pendente').update(status='recusado')
 
@@ -443,6 +457,7 @@ def criar_interesse(request, livro_id):
     if livro.dono == request.user:
         return Response({'status': 'error', 'message': _('Você não pode demonstrar interesse no seu próprio livro.')}, status=status.HTTP_400_BAD_REQUEST)
 
+    # get_or_create evita interesses duplicados do mesmo usuário no mesmo livro
     interesse, criado = Interesse.objects.get_or_create(
         usuario=request.user,
         livro=livro,
@@ -608,6 +623,7 @@ def aceitar_interesse(request, interesse_id):
     interesse.status = 'aceito'
     interesse.save()
 
+    # marca o livro como reservado e tira do feed
     livro = interesse.livro
     livro.status = 'reservado'
     livro.disponivel = False
@@ -674,6 +690,7 @@ def recusar_interesse(request, interesse_id):
     interesse.status = 'recusado'
     interesse.save()
 
+    # notifica o usuário interessado por e-mail sobre a recusa
     interessado = interesse.usuario
     livro = interesse.livro
     nome_interessado = interessado.first_name or interessado.username

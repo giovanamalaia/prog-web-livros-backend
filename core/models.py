@@ -113,6 +113,7 @@ class Interesse(models.Model):
         return f"{self.usuario.username} tem interesse em {self.livro.titulo}"
 
 
+# model de desejo futuro - livro salvo pelo usuário sem notificar o dono
 class DesejoFuturo(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='desejos_futuros')
     livro = models.ForeignKey(Livro, on_delete=models.CASCADE, related_name='desejado_futuramente_por')
