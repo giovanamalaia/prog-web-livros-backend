@@ -20,6 +20,21 @@ def check_auth(request):
         return Response({'status': 'error', 'message': 'Usuário não autenticado.'}, status=status.HTTP_401_UNAUTHORIZED)
     return None
 
+def _capa_url(request, livro):
+    if livro.capa:
+        return request.build_absolute_uri(livro.capa.url)
+    return None
+
+def _serialize_livro(request, livro):
+    return {
+        'id': livro.id,
+        'titulo': livro.titulo,
+        'autor': livro.autor,
+        'genero': livro.genero,
+        'status': livro.status,
+        'capa_url': _capa_url(request, livro),
+    }
+
 @extend_schema(
     summary="Carregar Home",
     description="Retorna os livros disponíveis, agrupados por recentes, próximos e por gênero.",
@@ -72,14 +87,14 @@ def home(request):
         if livros_do_genero.exists():
             livros_por_genero.append({
                 'titulo_secao': nome_bonito.upper(),
-                'livros': list(livros_do_genero.values('id', 'titulo', 'autor', 'genero')[:10])
+                'livros': [_serialize_livro(request, l) for l in livros_do_genero[:10]]
             })
 
     return Response({
         'status': 'success',
         'data': {
-            'latest_books': list(latest_books.values('id', 'titulo', 'autor', 'genero')),
-            'livros_perto': list(livros_perto.values('id', 'titulo', 'autor', 'genero')),
+            'latest_books': [_serialize_livro(request, l) for l in latest_books],
+            'livros_perto': [_serialize_livro(request, l) for l in livros_perto],
             'livros_por_genero': livros_por_genero,
         }
     }, status=status.HTTP_200_OK)
@@ -144,6 +159,7 @@ def configuracoes(request):
     perfil, _ = Perfil.objects.get_or_create(user=user)
 
     if request.method == 'GET':
+        foto_perfil_url = request.build_absolute_uri(perfil.foto_perfil.url) if perfil.foto_perfil else None
         return Response({
             'status': 'success',
             'data': {
@@ -153,6 +169,7 @@ def configuracoes(request):
                 'email': user.email,
                 'estado': perfil.estado,
                 'cidade': perfil.cidade,
+                'foto_perfil_url': foto_perfil_url,
             }
         }, status=status.HTTP_200_OK)
 
@@ -193,7 +210,7 @@ def perfil_logado(request):
     auth_error = check_auth(request)
     if auth_error: return auth_error
 
-    meus_livros = list(Livro.objects.filter(dono=request.user).order_by('-data_adicao').values('id', 'titulo', 'autor', 'status'))
+    meus_livros = [_serialize_livro(request, l) for l in Livro.objects.filter(dono=request.user).order_by('-data_adicao')]
     return Response({'status': 'success', 'data': {'meus_livros': meus_livros}}, status=status.HTTP_200_OK)
 
 @extend_schema(summary="Listar Perfil Público de Outro Usuário", tags=["Perfil"])
@@ -248,6 +265,8 @@ def detalhe_livro(request, livro_id):
         if interesse_obj:
             meu_interesse = interesse_obj.status
 
+    capa_url = _capa_url(request, livro)
+
     return Response({
         'status': 'success',
         'data': {
@@ -259,7 +278,8 @@ def detalhe_livro(request, livro_id):
             'disponivel': livro.disponivel,
             'dono_id': livro.dono.id,
             'dono_username': livro.dono.username,
-            'meu_interesse': meu_interesse
+            'meu_interesse': meu_interesse,
+            'capa_url': capa_url,
         }
     }, status=status.HTTP_200_OK)
 
@@ -362,7 +382,8 @@ def favoritos(request):
         'status_interesse': i.status,
         'livro_id': i.livro.id,
         'livro_titulo': i.livro.titulo,
-        'livro_autor': i.livro.autor
+        'livro_autor': i.livro.autor,
+        'livro_capa_url': _capa_url(request, i.livro),
     } for i in interesses]
 
     return Response({'status': 'success', 'data': interesses_data}, status=status.HTTP_200_OK)
