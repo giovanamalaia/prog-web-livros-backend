@@ -172,6 +172,4 @@ http://127.0.0.1:8000/api/
 
 ## O que nao funcionou ou exige atencao
 
-- O envio de e-mails depende das variaveis `EMAIL_USER` e `EMAIL_PASSWORD`. Sem SMTP configurado, os fluxos de recuperacao de senha e notificacoes por e-mail podem falhar.
-- O envio de e-mail e feito de forma sincrona; em conexoes lentas, algumas acoes podem demorar alguns segundos.
-- Os links publicados precisam ser atualizados neste README antes da entrega final.
+- O envio de e-mails depende das variaveis `EMAIL_USER` e `EMAIL_PASSWORD`. Sem SMTP configurado, os fluxos de recuperacao de senha e notificacoes por e-mail podem falhar. Fora isso, tudo pareceu funcionar! 
