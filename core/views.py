@@ -237,6 +237,7 @@ def configuracoes(request):
     perfil, perfil_criado = Perfil.objects.get_or_create(user=user)
 
     if request.method == 'GET':
+        foto_perfil_url = request.build_absolute_uri(perfil.foto_perfil.url) if perfil.foto_perfil else None
         return Response({
             'status': 'success',
             'data': {
@@ -353,6 +354,8 @@ def detalhe_livro(request, livro_id):
         interesse_obj = Interesse.objects.filter(usuario=request.user, livro=livro).first()
         if interesse_obj:
             meu_interesse = interesse_obj.status
+
+    capa_url = _capa_url(request, livro)
 
     return Response({
         'status': 'success',
