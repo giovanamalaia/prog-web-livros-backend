@@ -111,4 +111,18 @@ class Interesse(models.Model):
 
     def __str__(self):
         return f"{self.usuario.username} tem interesse em {self.livro.titulo}"
+
+
+class DesejoFuturo(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='desejos_futuros')
+    livro = models.ForeignKey(Livro, on_delete=models.CASCADE, related_name='desejado_futuramente_por')
+    data = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['usuario', 'livro'], name='unique_desejo_futuro_usuario_livro')
+        ]
+
+    def __str__(self):
+        return f"{self.usuario.username} deseja futuramente {self.livro.titulo}"
     

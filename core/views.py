@@ -19,7 +19,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
-from .models import Livro, Interesse, Perfil
+from .models import Livro, Interesse, Perfil, DesejoFuturo
 from .forms import RegistroForm, LoginForm, PerfilLocalizacaoForm, LivroForm
 
 def check_auth(request):
@@ -366,10 +366,12 @@ def detalhe_livro(request, livro_id):
         return Response({'status': 'error', 'message': 'Livro não encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
     meu_interesse = None
+    meu_desejo_futuro = False
     if request.user != livro.dono:
         interesse_obj = Interesse.objects.filter(usuario=request.user, livro=livro).first()
         if interesse_obj:
             meu_interesse = interesse_obj.status
+        meu_desejo_futuro = DesejoFuturo.objects.filter(usuario=request.user, livro=livro).exists()
 
     return Response({
         'status': 'success',
@@ -386,7 +388,8 @@ def detalhe_livro(request, livro_id):
             'dono_username': livro.dono.username,
             'dono_foto_perfil_url': perfil_foto_url(getattr(livro.dono, 'perfil', None), request),
             'is_owner': request.user == livro.dono,
-            'meu_interesse': meu_interesse
+            'meu_interesse': meu_interesse,
+            'meu_desejo_futuro': meu_desejo_futuro
         }
     }, status=status.HTTP_200_OK)
 
@@ -480,6 +483,63 @@ def excluir_interesse(request, livro_id):
     if apagados:
         return Response({'status': 'success', 'message': 'Interesse removido.'}, status=status.HTTP_200_OK)
     return Response({'status': 'error', 'message': 'Interesse não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+@extend_schema(summary="Adicionar Livro aos Desejos Futuros", tags=["Desejos Futuros"])
+@api_view(['POST'])
+def criar_desejo_futuro(request, livro_id):
+    auth_error = check_auth(request)
+    if auth_error: return auth_error
+
+    try:
+        livro = Livro.objects.get(id=livro_id)
+    except Livro.DoesNotExist:
+        return Response({'status': 'error', 'message': 'Livro não encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+    if livro.dono == request.user:
+        return Response({'status': 'error', 'message': 'Você não pode adicionar seu próprio livro aos desejos futuros.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    _, criado = DesejoFuturo.objects.get_or_create(usuario=request.user, livro=livro)
+    if criado:
+        return Response({'status': 'success', 'message': 'Livro salvo nos desejos futuros.'}, status=status.HTTP_201_CREATED)
+    return Response({'status': 'info', 'message': 'Este livro já está nos seus desejos futuros.'}, status=status.HTTP_200_OK)
+
+@extend_schema(summary="Remover Livro dos Desejos Futuros", tags=["Desejos Futuros"])
+@api_view(['POST', 'DELETE'])
+def excluir_desejo_futuro(request, livro_id):
+    auth_error = check_auth(request)
+    if auth_error: return auth_error
+
+    apagados, _ = DesejoFuturo.objects.filter(usuario=request.user, livro_id=livro_id).delete()
+    if apagados:
+        return Response({'status': 'success', 'message': 'Livro removido dos desejos futuros.'}, status=status.HTTP_200_OK)
+    return Response({'status': 'error', 'message': 'Desejo futuro não encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+@extend_schema(summary="Listar Desejos Futuros", tags=["Desejos Futuros"])
+@api_view(['GET'])
+def desejos_futuros(request):
+    auth_error = check_auth(request)
+    if auth_error: return auth_error
+
+    desejos = DesejoFuturo.objects.filter(usuario=request.user).select_related('livro').order_by('-data')
+    q = request.GET.get('q', '').strip()
+
+    if q:
+        termos = [termo for termo in q.split() if termo]
+        for termo in termos:
+            desejos = desejos.filter(
+                Q(livro__titulo__istartswith=termo) | Q(livro__titulo__icontains=f" {termo}") |
+                Q(livro__autor__istartswith=termo) | Q(livro__autor__icontains=f" {termo}")
+            )
+
+    desejos_data = [{
+        'id': desejo.id,
+        'livro_id': desejo.livro.id,
+        'livro_titulo': desejo.livro.titulo,
+        'livro_autor': desejo.livro.autor,
+        'livro_capa_url': request.build_absolute_uri(desejo.livro.capa.url) if desejo.livro.capa else None
+    } for desejo in desejos]
+
+    return Response({'status': 'success', 'data': desejos_data}, status=status.HTTP_200_OK)
 
 @extend_schema(summary="Listar Livros Favoritados", tags=["Interesses"])
 @api_view(['GET'])

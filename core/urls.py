@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     csrf, home, registro, login, logout, favoritos, notificacoes, perfil_logado, 
     perfil_publico, configuracoes, adicionar_livro, detalhe_livro, 
-    editar_livro, excluir_livro, criar_interesse, excluir_interesse, 
+    editar_livro, excluir_livro, criar_interesse, excluir_interesse,
+    criar_desejo_futuro, excluir_desejo_futuro, desejos_futuros,
     aceitar_interesse, recusar_interesse, solicitar_recuperacao_senha,
     confirmar_recuperacao_senha, solicitar_redefinicao_senha_logado, trocar_idioma
 )
@@ -25,6 +26,7 @@ urlpatterns = [
     path('perfil/<int:user_id>/', perfil_publico, name='perfil_publico'),
     path('configuracoes/', configuracoes, name='configuracoes'), 
     path('favoritos/', favoritos, name='favoritos'), 
+    path('desejos-futuros/', desejos_futuros, name='desejos_futuros'),
     path('notificacoes/', notificacoes, name='notificacoes'),
 
     # CRUD de Livros
@@ -36,6 +38,8 @@ urlpatterns = [
     # Ações de Interesse (Match)
     path('livro/<int:livro_id>/interesse/', criar_interesse, name='criar_interesse'),
     path('livro/<int:livro_id>/interesse/excluir/', excluir_interesse, name='excluir_interesse'),
+    path('livro/<int:livro_id>/desejo-futuro/', criar_desejo_futuro, name='criar_desejo_futuro'),
+    path('livro/<int:livro_id>/desejo-futuro/excluir/', excluir_desejo_futuro, name='excluir_desejo_futuro'),
     path('interesse/<int:interesse_id>/aceitar/', aceitar_interesse, name='aceitar_interesse'),
     path('interesse/<int:interesse_id>/recusar/', recusar_interesse, name='recusar_interesse'),
 
