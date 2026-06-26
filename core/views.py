@@ -355,8 +355,6 @@ def detalhe_livro(request, livro_id):
         if interesse_obj:
             meu_interesse = interesse_obj.status
 
-    capa_url = _capa_url(request, livro)
-
     return Response({
         'status': 'success',
         'data': {
