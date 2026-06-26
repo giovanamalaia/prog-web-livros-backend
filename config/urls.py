@@ -2,12 +2,29 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+
+
+def schema_view(request, *args, **kwargs):
+    from drf_spectacular.views import SpectacularAPIView
+    return SpectacularAPIView.as_view()(request, *args, **kwargs)
+
+
+def swagger_view(request, *args, **kwargs):
+    from drf_spectacular.views import SpectacularSwaggerView
+    return SpectacularSwaggerView.as_view(url_name='schema')(request, *args, **kwargs)
+
+
+def redoc_view(request, *args, **kwargs):
+    from drf_spectacular.views import SpectacularRedocView
+    return SpectacularRedocView.as_view(url_name='schema')(request, *args, **kwargs)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('core.urls')), 
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='schema-swagger-ui'),
-    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='schema-redoc'),
+    path('api/schema/', schema_view, name='schema'),
+    path('swagger/', swagger_view, name='schema-swagger-ui'),
+    path('redoc/', redoc_view, name='schema-redoc'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -144,17 +144,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-#ENVIANDO EMAIL!
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-
-# Puxa as informações com segurança do seu arquivo .env:
 EMAIL_HOST_USER = os.getenv('EMAIL_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASSWORD')
 
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+# ENVIANDO EMAIL!
+# Se EMAIL_USER/EMAIL_PASSWORD existirem no .env, usa SMTP real.
+# Sem credenciais locais, imprime o e-mail no terminal para o fluxo ser testável.
+if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'no-reply@livro.local'
 
 
 CORS_ALLOWED_ORIGINS = [
@@ -162,6 +166,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5500",
     "http://localhost:3000",
     "http://localhost:5173", # Porta padrão do Vite
+    "http://127.0.0.1:5173",
 ]
 
 # Permite que os cookies de login passem do front pro back
@@ -173,6 +178,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:5500",
     "http://localhost:3000",
     "http://localhost:5173",
+    "http://127.0.0.1:5173",
 ]
 
 REST_FRAMEWORK = {

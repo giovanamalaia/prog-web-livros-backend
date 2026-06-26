@@ -1,11 +1,18 @@
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import SetPasswordForm
+from django.contrib.auth.tokens import default_token_generator
 from django.db.models import Q, Case, When, Value, IntegerField
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import translation
 from django.utils.translation import gettext as _
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.utils.encoding import force_bytes
 from django.shortcuts import get_object_or_404
+from django.middleware.csrf import get_token
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -19,6 +26,29 @@ def check_auth(request):
     if not request.user.is_authenticated:
         return Response({'status': 'error', 'message': 'Usuário não autenticado.'}, status=status.HTTP_401_UNAUTHORIZED)
     return None
+
+def livro_resumo(livro, request):
+    return {
+        'id': livro.id,
+        'titulo': livro.titulo,
+        'autor': livro.autor,
+        'genero': livro.genero,
+        'estado': livro.estado,
+        'status': livro.status,
+        'disponivel': livro.disponivel,
+        'capa_url': request.build_absolute_uri(livro.capa.url) if livro.capa else None,
+    }
+
+def perfil_foto_url(perfil, request):
+    if perfil and perfil.foto_perfil:
+        return request.build_absolute_uri(perfil.foto_perfil.url)
+    return None
+
+@extend_schema(summary="Obter CSRF Token", tags=["Autenticação"])
+@ensure_csrf_cookie
+@api_view(['GET'])
+def csrf(request):
+    return Response({'status': 'success', 'csrfToken': get_token(request)}, status=status.HTTP_200_OK)
 
 @extend_schema(
     summary="Carregar Home",
@@ -72,14 +102,14 @@ def home(request):
         if livros_do_genero.exists():
             livros_por_genero.append({
                 'titulo_secao': nome_bonito.upper(),
-                'livros': list(livros_do_genero.values('id', 'titulo', 'autor', 'genero')[:10])
+                'livros': [livro_resumo(livro, request) for livro in livros_do_genero[:10]]
             })
 
     return Response({
         'status': 'success',
         'data': {
-            'latest_books': list(latest_books.values('id', 'titulo', 'autor', 'genero')),
-            'livros_perto': list(livros_perto.values('id', 'titulo', 'autor', 'genero')),
+            'latest_books': [livro_resumo(livro, request) for livro in latest_books],
+            'livros_perto': [livro_resumo(livro, request) for livro in livros_perto],
             'livros_por_genero': livros_por_genero,
         }
     }, status=status.HTTP_200_OK)
@@ -111,6 +141,69 @@ def login(request):
         return Response({'status': 'success', 'message': _('Login realizado com sucesso!')}, status=status.HTTP_200_OK)
     return Response({'status': 'error', 'errors': form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
+@extend_schema(summary="Solicitar Recuperação de Senha", tags=["Autenticação"])
+@api_view(['POST'])
+def solicitar_recuperacao_senha(request):
+    email = request.data.get('email', '').strip()
+    frontend_url = request.data.get('frontend_url', 'http://127.0.0.1:5173').rstrip('/')
+
+    if not email:
+        return Response({'status': 'error', 'message': 'Informe o e-mail cadastrado.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    usuarios = User.objects.filter(email__iexact=email, is_active=True)
+
+    for user in usuarios:
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        reset_url = f"{frontend_url}/?reset=1&uid={uid}&token={token}"
+        nome = user.first_name or user.username
+        mensagem = (
+            f"Olá {nome},\n\n"
+            "Recebemos uma solicitação para redefinir sua senha no Livrô.\n\n"
+            f"Acesse o link abaixo para criar uma nova senha:\n{reset_url}\n\n"
+            "Se você não solicitou essa alteração, ignore este e-mail."
+        )
+        send_mail(
+            'Recuperação de senha - Livrô',
+            mensagem,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+
+    return Response({
+        'status': 'success',
+        'message': 'Se o e-mail estiver cadastrado, enviaremos um link de recuperação.'
+    }, status=status.HTTP_200_OK)
+
+@extend_schema(summary="Confirmar Nova Senha", tags=["Autenticação"])
+@api_view(['POST'])
+def confirmar_recuperacao_senha(request):
+    uid = request.data.get('uid')
+    token = request.data.get('token')
+    senha = request.data.get('new_password1')
+    confirmar_senha = request.data.get('new_password2')
+
+    try:
+        user_id = force_str(urlsafe_base64_decode(uid))
+        user = User.objects.get(pk=user_id)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        return Response({'status': 'error', 'message': 'Link de recuperação inválido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not default_token_generator.check_token(user, token):
+        return Response({'status': 'error', 'message': 'Link de recuperação expirado ou inválido.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    form = SetPasswordForm(user, {
+        'new_password1': senha,
+        'new_password2': confirmar_senha,
+    })
+
+    if not form.is_valid():
+        return Response({'status': 'error', 'errors': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    form.save()
+    return Response({'status': 'success', 'message': 'Senha alterada com sucesso. Faça login novamente.'}, status=status.HTTP_200_OK)
+
 @extend_schema(summary="Logout", tags=["Autenticação"])
 @api_view(['POST'])
 def logout(request):
@@ -141,7 +234,7 @@ def configuracoes(request):
     if auth_error: return auth_error
 
     user = request.user
-    perfil, _ = Perfil.objects.get_or_create(user=user)
+    perfil, perfil_criado = Perfil.objects.get_or_create(user=user)
 
     if request.method == 'GET':
         return Response({
@@ -153,6 +246,7 @@ def configuracoes(request):
                 'email': user.email,
                 'estado': perfil.estado,
                 'cidade': perfil.cidade,
+                'foto_perfil_url': perfil_foto_url(perfil, request),
             }
         }, status=status.HTTP_200_OK)
 
@@ -193,8 +287,19 @@ def perfil_logado(request):
     auth_error = check_auth(request)
     if auth_error: return auth_error
 
-    meus_livros = list(Livro.objects.filter(dono=request.user).order_by('-data_adicao').values('id', 'titulo', 'autor', 'status'))
-    return Response({'status': 'success', 'data': {'meus_livros': meus_livros}}, status=status.HTTP_200_OK)
+    perfil, perfil_criado = Perfil.objects.get_or_create(user=request.user)
+    meus_livros = [livro_resumo(livro, request) for livro in Livro.objects.filter(dono=request.user).order_by('-data_adicao')]
+    return Response({
+        'status': 'success',
+        'data': {
+            'username': request.user.username,
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'cidade': perfil.cidade,
+            'foto_perfil_url': perfil_foto_url(perfil, request),
+            'meus_livros': meus_livros
+        }
+    }, status=status.HTTP_200_OK)
 
 @extend_schema(summary="Listar Perfil Público de Outro Usuário", tags=["Perfil"])
 @api_view(['GET'])
@@ -204,12 +309,13 @@ def perfil_publico(request, user_id):
 
     try:
         perfil_user = User.objects.get(id=user_id)
-        livros_dono = list(Livro.objects.filter(dono=perfil_user).order_by('-data_adicao').values('id', 'titulo', 'autor', 'status'))
+        livros_dono = [livro_resumo(livro, request) for livro in Livro.objects.filter(dono=perfil_user).order_by('-data_adicao')]
         return Response({
             'status': 'success',
             'data': {
                 'username': perfil_user.username,
                 'first_name': perfil_user.first_name,
+                'foto_perfil_url': perfil_foto_url(getattr(perfil_user, 'perfil', None), request),
                 'livros': livros_dono
             }
         }, status=status.HTTP_200_OK)
@@ -257,8 +363,11 @@ def detalhe_livro(request, livro_id):
             'genero': livro.genero,
             'status': livro.status,
             'disponivel': livro.disponivel,
+            'estado': livro.estado,
+            'capa_url': request.build_absolute_uri(livro.capa.url) if livro.capa else None,
             'dono_id': livro.dono.id,
             'dono_username': livro.dono.username,
+            'is_owner': request.user == livro.dono,
             'meu_interesse': meu_interesse
         }
     }, status=status.HTTP_200_OK)
@@ -322,9 +431,23 @@ def criar_interesse(request, livro_id):
     if criado:
         if livro.dono.email: 
             assunto = _("Boas notícias! Alguém quer seu livro: %(titulo)s") % {'titulo': livro.titulo}
-            mensagem = _("Alguém demonstrou interesse no seu livro %(titulo)s. Acesse a plataforma!") % {'titulo': livro.titulo}
-            try: send_mail(assunto, mensagem, settings.DEFAULT_FROM_EMAIL, [livro.dono.email], fail_silently=True)
-            except Exception: pass
+            nome_dono = livro.dono.first_name or livro.dono.username
+            nome_interessado = request.user.username or request.user.first_name
+            mensagem = _(
+                "Olá %(nome_dono)s,\n\n"
+                "O usuário %(nome_interessado)s acabou de demonstrar interesse em trocar o seu livro '%(titulo)s'.\n\n"
+                "Acesse a plataforma para aceitar ou recusar a solicitação!\n\n"
+                "Abraços,\n"
+                "Equipe do Livrô"
+            ) % {
+                'nome_dono': nome_dono.title(),
+                'nome_interessado': nome_interessado,
+                'titulo': livro.titulo,
+            }
+            try:
+                send_mail(assunto, mensagem, settings.DEFAULT_FROM_EMAIL, [livro.dono.email], fail_silently=False)
+            except Exception as exc:
+                print(f"Erro ao tentar enviar email: {exc}")
         return Response({'status': 'success', 'message': _('Interesse registrado!')}, status=status.HTTP_201_CREATED)
     
     return Response({'status': 'info', 'message': _('Você já demonstrou interesse nesse livro.')}, status=status.HTTP_200_OK)
@@ -362,10 +485,35 @@ def favoritos(request):
         'status_interesse': i.status,
         'livro_id': i.livro.id,
         'livro_titulo': i.livro.titulo,
-        'livro_autor': i.livro.autor
+        'livro_autor': i.livro.autor,
+        'livro_capa_url': request.build_absolute_uri(i.livro.capa.url) if i.livro.capa else None
     } for i in interesses]
 
     return Response({'status': 'success', 'data': interesses_data}, status=status.HTTP_200_OK)
+
+@extend_schema(summary="Listar Notificações de Interesses Recebidos", tags=["Interesses"])
+@api_view(['GET'])
+def notificacoes(request):
+    auth_error = check_auth(request)
+    if auth_error: return auth_error
+
+    interesses = (
+        Interesse.objects
+        .filter(livro__dono=request.user, status='pendente')
+        .select_related('usuario', 'livro')
+        .order_by('-data')[:10]
+    )
+
+    data = [{
+        'id': interesse.id,
+        'usuario_id': interesse.usuario.id,
+        'usuario_nome': interesse.usuario.first_name or interesse.usuario.username,
+        'livro_id': interesse.livro.id,
+        'livro_titulo': interesse.livro.titulo,
+        'data': interesse.data.isoformat(),
+    } for interesse in interesses]
+
+    return Response({'status': 'success', 'data': data}, status=status.HTTP_200_OK)
 
 @extend_schema(summary="Aceitar Interesse Recebido", tags=["Interesses"])
 @api_view(['POST'])
@@ -386,7 +534,52 @@ def aceitar_interesse(request, interesse_id):
     livro.disponivel = False
     livro.save(update_fields=['status', 'disponivel'])
 
-    return Response({'status': 'success', 'message': _('Interesse aceito! Contatos enviados por email.')}, status=status.HTTP_200_OK)
+    dono = interesse.livro.dono
+    interessado = interesse.usuario
+    nome_dono = dono.first_name or dono.username
+    nome_interessado = interessado.first_name or interessado.username
+
+    if dono.email:
+        assunto_dono = _("Match! Você aceitou trocar: %(titulo)s") % {'titulo': livro.titulo}
+        msg_dono = _(
+            "Olá %(nome_dono)s,\n\n"
+            "Você acabou de aceitar a solicitação de %(nome_interessado)s para o livro '%(titulo)s'.\n\n"
+            "Para combinar a troca, entre em contato diretamente pelo e-mail:\n"
+            "%(email)s\n\n"
+            "Boas trocas!\n"
+            "Equipe do Livrô"
+        ) % {
+            'nome_dono': nome_dono.title(),
+            'nome_interessado': nome_interessado.title(),
+            'titulo': livro.titulo,
+            'email': interessado.email,
+        }
+        try:
+            send_mail(assunto_dono, msg_dono, settings.DEFAULT_FROM_EMAIL, [dono.email], fail_silently=False)
+        except Exception as exc:
+            print(f"Erro ao enviar e-mail para o dono: {exc}")
+
+    if interessado.email:
+        assunto_interessado = _("Deu Match! Seu interesse em %(titulo)s foi aceito!") % {'titulo': livro.titulo}
+        msg_interessado = _(
+            "Olá %(nome_interessado)s,\n\n"
+            "Ótimas notícias! O usuário %(nome_dono)s aceitou o seu interesse pelo livro '%(titulo)s'.\n\n"
+            "Para combinar os detalhes da troca, mande um e-mail para:\n"
+            "%(email)s\n\n"
+            "Boas trocas!\n"
+            "Equipe do Livrô"
+        ) % {
+            'nome_interessado': nome_interessado.title(),
+            'nome_dono': nome_dono.title(),
+            'titulo': livro.titulo,
+            'email': dono.email,
+        }
+        try:
+            send_mail(assunto_interessado, msg_interessado, settings.DEFAULT_FROM_EMAIL, [interessado.email], fail_silently=False)
+        except Exception as exc:
+            print(f"Erro ao enviar e-mail para o interessado: {exc}")
+
+    return Response({'status': 'success', 'message': _('Interesse aceito! Os e-mails de contato foram enviados para os dois.')}, status=status.HTTP_200_OK)
 
 @extend_schema(summary="Recusar Interesse Recebido", tags=["Interesses"])
 @api_view(['POST'])
@@ -402,7 +595,29 @@ def recusar_interesse(request, interesse_id):
     interesse.status = 'recusado'
     interesse.save()
 
-    return Response({'status': 'success', 'message': _('Interesse recusado.')}, status=status.HTTP_200_OK)
+    interessado = interesse.usuario
+    livro = interesse.livro
+    nome_interessado = interessado.first_name or interessado.username
+
+    if interessado.email:
+        assunto_interessado = _("Atualização sobre o livro: %(titulo)s") % {'titulo': livro.titulo}
+        msg_interessado = _(
+            "Olá %(nome_interessado)s,\n\n"
+            "Infelizmente, o dono do livro '%(titulo)s' não pôde aceitar a sua solicitação de troca neste momento. "
+            "O livro pode já ter sido prometido a outra pessoa.\n\n"
+            "Não desanime! Continue explorando a plataforma para encontrar outras opções.\n\n"
+            "Abraços,\n"
+            "Equipe do Livrô"
+        ) % {
+            'nome_interessado': nome_interessado.title(),
+            'titulo': livro.titulo,
+        }
+        try:
+            send_mail(assunto_interessado, msg_interessado, settings.DEFAULT_FROM_EMAIL, [interessado.email], fail_silently=False)
+        except Exception as exc:
+            print(f"Erro ao enviar e-mail de recusa: {exc}")
+
+    return Response({'status': 'success', 'message': _('O interesse foi recusado e o usuário foi notificado.')}, status=status.HTTP_200_OK)
 
 from django.http import JsonResponse
 

@@ -1,16 +1,20 @@
 from django.urls import path
 from .views import (
-    home, registro, login, logout, favoritos, perfil_logado, 
+    csrf, home, registro, login, logout, favoritos, notificacoes, perfil_logado, 
     perfil_publico, configuracoes, adicionar_livro, detalhe_livro, 
     editar_livro, excluir_livro, criar_interesse, excluir_interesse, 
-    aceitar_interesse, recusar_interesse, trocar_idioma
+    aceitar_interesse, recusar_interesse, solicitar_recuperacao_senha,
+    confirmar_recuperacao_senha, trocar_idioma
 )
 
 urlpatterns = [
     # Autenticação
+    path('csrf/', csrf, name='csrf'),
     path('login/', login, name='login'),
     path('cadastro/', registro, name='registro'),
     path('logout/', logout, name='logout'),
+    path('senha/recuperar/', solicitar_recuperacao_senha, name='solicitar_recuperacao_senha'),
+    path('senha/confirmar/', confirmar_recuperacao_senha, name='confirmar_recuperacao_senha'),
 
     # Feed / Home
     path('home/', home, name='home'),
@@ -20,6 +24,7 @@ urlpatterns = [
     path('perfil/<int:user_id>/', perfil_publico, name='perfil_publico'),
     path('configuracoes/', configuracoes, name='configuracoes'), 
     path('favoritos/', favoritos, name='favoritos'), 
+    path('notificacoes/', notificacoes, name='notificacoes'),
 
     # CRUD de Livros
     path('adicionar-livro/', adicionar_livro, name='adicionar_livro'),

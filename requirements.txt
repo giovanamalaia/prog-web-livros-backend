@@ -4,3 +4,4 @@ python-dotenv
 djangorestframework
 drf-spectacular
 pyyaml
+django-cors-headers
