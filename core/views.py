@@ -344,7 +344,7 @@ def detalhe_livro(request, livro_id):
     if auth_error: return auth_error
 
     try:
-        livro = Livro.objects.get(id=livro_id)
+        livro = Livro.objects.select_related('dono', 'dono__perfil').get(id=livro_id)
     except Livro.DoesNotExist:
         return Response({'status': 'error', 'message': 'Livro não encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -367,6 +367,7 @@ def detalhe_livro(request, livro_id):
             'capa_url': request.build_absolute_uri(livro.capa.url) if livro.capa else None,
             'dono_id': livro.dono.id,
             'dono_username': livro.dono.username,
+            'dono_foto_perfil_url': perfil_foto_url(getattr(livro.dono, 'perfil', None), request),
             'is_owner': request.user == livro.dono,
             'meu_interesse': meu_interesse
         }
@@ -508,6 +509,7 @@ def notificacoes(request):
         'id': interesse.id,
         'usuario_id': interesse.usuario.id,
         'usuario_nome': interesse.usuario.first_name or interesse.usuario.username,
+        'usuario_foto_perfil_url': perfil_foto_url(getattr(interesse.usuario, 'perfil', None), request),
         'livro_id': interesse.livro.id,
         'livro_titulo': interesse.livro.titulo,
         'data': interesse.data.isoformat(),
