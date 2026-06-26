@@ -237,6 +237,7 @@ def configuracoes(request):
     perfil, perfil_criado = Perfil.objects.get_or_create(user=user)
 
     if request.method == 'GET':
+        foto_perfil_url = request.build_absolute_uri(perfil.foto_perfil.url) if perfil.foto_perfil else None
         return Response({
             'status': 'success',
             'data': {
