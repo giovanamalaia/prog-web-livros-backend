@@ -44,6 +44,25 @@ def perfil_foto_url(perfil, request):
         return request.build_absolute_uri(perfil.foto_perfil.url)
     return None
 
+def enviar_email_recuperacao_senha(user, frontend_url):
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    reset_url = f"{frontend_url}/?reset=1&uid={uid}&token={token}"
+    nome = user.first_name or user.username
+    mensagem = (
+        f"Olá {nome},\n\n"
+        "Recebemos uma solicitação para redefinir sua senha no Livrô.\n\n"
+        f"Acesse o link abaixo para criar uma nova senha:\n{reset_url}\n\n"
+        "Se você não solicitou essa alteração, ignore este e-mail."
+    )
+    send_mail(
+        'Recuperação de senha - Livrô',
+        mensagem,
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email],
+        fail_silently=False,
+    )
+
 @extend_schema(summary="Obter CSRF Token", tags=["Autenticação"])
 @ensure_csrf_cookie
 @api_view(['GET'])
@@ -153,28 +172,25 @@ def solicitar_recuperacao_senha(request):
     usuarios = User.objects.filter(email__iexact=email, is_active=True)
 
     for user in usuarios:
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
-        reset_url = f"{frontend_url}/?reset=1&uid={uid}&token={token}"
-        nome = user.first_name or user.username
-        mensagem = (
-            f"Olá {nome},\n\n"
-            "Recebemos uma solicitação para redefinir sua senha no Livrô.\n\n"
-            f"Acesse o link abaixo para criar uma nova senha:\n{reset_url}\n\n"
-            "Se você não solicitou essa alteração, ignore este e-mail."
-        )
-        send_mail(
-            'Recuperação de senha - Livrô',
-            mensagem,
-            settings.DEFAULT_FROM_EMAIL,
-            [user.email],
-            fail_silently=False,
-        )
+        enviar_email_recuperacao_senha(user, frontend_url)
 
     return Response({
         'status': 'success',
         'message': 'Se o e-mail estiver cadastrado, enviaremos um link de recuperação.'
     }, status=status.HTTP_200_OK)
+
+@extend_schema(summary="Solicitar Redefinição de Senha do Usuário Logado", tags=["Configurações"])
+@api_view(['POST'])
+def solicitar_redefinicao_senha_logado(request):
+    auth_error = check_auth(request)
+    if auth_error: return auth_error
+
+    if not request.user.email:
+        return Response({'status': 'error', 'message': 'Cadastre um e-mail antes de redefinir a senha.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    frontend_url = request.data.get('frontend_url', 'http://127.0.0.1:5173').rstrip('/')
+    enviar_email_recuperacao_senha(request.user, frontend_url)
+    return Response({'status': 'success', 'message': 'Enviamos um link de redefinição para o seu e-mail.'}, status=status.HTTP_200_OK)
 
 @extend_schema(summary="Confirmar Nova Senha", tags=["Autenticação"])
 @api_view(['POST'])

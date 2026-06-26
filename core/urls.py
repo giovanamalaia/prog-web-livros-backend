@@ -4,7 +4,7 @@ from .views import (
     perfil_publico, configuracoes, adicionar_livro, detalhe_livro, 
     editar_livro, excluir_livro, criar_interesse, excluir_interesse, 
     aceitar_interesse, recusar_interesse, solicitar_recuperacao_senha,
-    confirmar_recuperacao_senha, trocar_idioma
+    confirmar_recuperacao_senha, solicitar_redefinicao_senha_logado, trocar_idioma
 )
 
 urlpatterns = [
@@ -14,6 +14,7 @@ urlpatterns = [
     path('cadastro/', registro, name='registro'),
     path('logout/', logout, name='logout'),
     path('senha/recuperar/', solicitar_recuperacao_senha, name='solicitar_recuperacao_senha'),
+    path('senha/redefinir-logado/', solicitar_redefinicao_senha_logado, name='solicitar_redefinicao_senha_logado'),
     path('senha/confirmar/', confirmar_recuperacao_senha, name='confirmar_recuperacao_senha'),
 
     # Feed / Home
