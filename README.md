@@ -179,4 +179,5 @@ http://127.0.0.1:8000/api/
 
 ## O que nao funcionou ou exige atencao
 
+- **Bloqueio de Cookies no Safari:** Navegadores com políticas muito estritas contra rastreamento (como o Safari via *Intelligent Tracking Prevention*) bloqueiam o envio de cookies de sessão entre domínios diferentes (cross-site cookies). Como o front-end está no Netlify e o back-end no PythonAnywhere, o Safari barra a autenticação. **O projeto foi testado e funciona perfeitamente no Google Chrome.**
 - O envio de e-mails depende das variaveis `EMAIL_USER` e `EMAIL_PASSWORD`. Sem SMTP configurado, os fluxos de recuperacao de senha e notificacoes por e-mail podem falhar. Fora isso, tudo pareceu funcionar! 
