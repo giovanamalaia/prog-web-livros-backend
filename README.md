@@ -11,11 +11,10 @@ Backend do projeto **Livro**, uma plataforma de troca de livros entre usuarios. 
 
 - Repositorio do backend: https://github.com/giovanamalaia/prog-web-livros-backend
 - Repositorio do frontend: https://github.com/giovanamalaia/prog-web-livros-frontend.git
-- Site do backend/API: adicionar link publicado
-- Site do frontend: adicionar link publicado
-- Swagger: `/swagger/`
-- Schema OpenAPI: `/api/schema/`
-- Redoc: `/redoc/`
+- Site do backend/API: https://giovanamalaia.pythonanywhere.com/api
+- Site do frontend: https://livroapp.netlify.app
+- Swagger: https://giovanamalaia.pythonanywhere.com/swagger/
+- Redoc: https://giovanamalaia.pythonanywhere.com/redoc/
 
 ## Screenshots
 
